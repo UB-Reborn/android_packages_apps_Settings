@@ -162,11 +162,6 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment implements In
             getPreferenceScreen().removePreference(findPreference(KEY_BASEBAND_VERSION));
         }
 
-        // Dont show feedback option if there is no reporter.
-        if (TextUtils.isEmpty(getFeedbackReporterPackage(getActivity()))) {
-            getPreferenceScreen().removePreference(findPreference(KEY_DEVICE_FEEDBACK));
-        }
-
         /*
          * Settings is a generic app and should not contain any device-specific
          * info.
@@ -265,8 +260,6 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment implements In
                         Toast.LENGTH_LONG);
                 mDevHitToast.show();
             }
-        } else if (preference.getKey().equals(KEY_DEVICE_FEEDBACK)) {
-            sendFeedback();
         } else if (preference.getKey().equals(KEY_CM_LICENSE)) {
             String userCMLicenseUrl = SystemProperties.get(PROPERTY_CMLICENSE_URL);
             final Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -320,16 +313,6 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment implements In
         } catch (RuntimeException e) {
             // No recovery
         }
-    }
-
-    private void sendFeedback() {
-        String reporterPackage = getFeedbackReporterPackage(getActivity());
-        if (TextUtils.isEmpty(reporterPackage)) {
-            return;
-        }
-        Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-        intent.setPackage(reporterPackage);
-        startActivityForResult(intent, 0);
     }
 
     /**
@@ -409,41 +392,6 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment implements In
         return "";
     }
 
-    private static String getFeedbackReporterPackage(Context context) {
-        final String feedbackReporter =
-                context.getResources().getString(R.string.oem_preferred_feedback_reporter);
-        if (TextUtils.isEmpty(feedbackReporter)) {
-            // Reporter not configured. Return.
-            return feedbackReporter;
-        }
-        // Additional checks to ensure the reporter is on system image, and reporter is
-        // configured to listen to the intent. Otherwise, dont show the "send feedback" option.
-        final Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-
-        PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> resolvedPackages =
-                pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
-        for (ResolveInfo info : resolvedPackages) {
-            if (info.activityInfo != null) {
-                if (!TextUtils.isEmpty(info.activityInfo.packageName)) {
-                    try {
-                        ApplicationInfo ai = pm.getApplicationInfo(info.activityInfo.packageName, 0);
-                        if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                            // Package is on the system image
-                            if (TextUtils.equals(
-                                        info.activityInfo.packageName, feedbackReporter)) {
-                                return feedbackReporter;
-                            }
-                        }
-                    } catch (PackageManager.NameNotFoundException e) {
-                         // No need to do anything here.
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * For Search.
      */
@@ -473,10 +421,6 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment implements In
                 // Remove Baseband version if wifi-only device
                 if (Utils.isWifiOnly(context) && !Utils.showSimCardTile(context)) {
                     keys.add((KEY_BASEBAND_VERSION));
-                }
-                // Dont show feedback option if there is no reporter.
-                if (TextUtils.isEmpty(getFeedbackReporterPackage(context))) {
-                    keys.add(KEY_DEVICE_FEEDBACK);
                 }
                 if (!checkIntentAction(context, "android.settings.TERMS")) {
                     keys.add(KEY_TERMS);

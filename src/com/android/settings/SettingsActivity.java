@@ -1289,15 +1289,6 @@ public class SettingsActivity extends Activity
                             UserManager.DISALLOW_DEBUGGING_FEATURES)) {
                         removeTile = true;
                     }
-                } else if (id == R.id.ota_settings) {
-                    // Embedding into Settings only if app exists (user could manually remove it)
-                    boolean supported = false;
-                    try {
-                        supported = (getPackageManager().getPackageInfo("com.ota.updates", 0).versionCode >= 0);
-                    } catch (PackageManager.NameNotFoundException e) {
- 
-                    }
-                    if (!supported) {
                         removeTile = true;
                     }
                 } else if (id == R.id.supersu_settings) {
@@ -1315,6 +1306,16 @@ public class SettingsActivity extends Activity
                     boolean supported = false;
                     try {
                         supported = (getPackageManager().getPackageInfo("com.vipercn.viper4android_v2", 0).versionCode >= 18);
+                    } catch (PackageManager.NameNotFoundException e) {
+                    }
+                    if (!supported) {
+                        removeTile = true;
+                    }
+                } else if (id == R.id.audiofx_settings) {
+                    // Embedding into Settings only if app exists (user could manually remove it)
+                    boolean supported = false;
+                    try {
+                        supported = (getPackageManager().getPackageInfo("org.cyanogenmod.audiofx", 0).versionCode >= 18);
                     } catch (PackageManager.NameNotFoundException e) {
                     }
                     if (!supported) {
