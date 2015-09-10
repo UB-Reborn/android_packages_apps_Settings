@@ -151,8 +151,6 @@
             android:title="@string/status_bar_bluetooth_icon"
             android:summary="@string/status_bar_bluetooth_icon_summary"
             android:defaultValue="true" />
-
-        <SwitchPreference
         
     <PreferenceScreen
         android:key="network_traffic_state"
